@@ -1,5 +1,5 @@
 package org.json;
-//annarita è cieca22
+//annarita è cieca30
 /*
 Copyright (c) 2002 JSON.org
 
@@ -1506,7 +1506,7 @@ public class JSONObject {
     }
     //____________________________________________________________
     
-    public static Object eccezioneValueToString(Object o) {
+    public static Object eccezioneValueToString(Object o, Object value) {
     	//divido il metodo principale per sviluppare solo le eccezioni
     	
     	if (value instanceof JSONString) {
@@ -1562,7 +1562,13 @@ public class JSONObject {
     }
 
 
-    /**
+    private static void nullMethod(Object value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	/**
      * Make a prettyprinted JSON text of an object value.
      * <p>
      * Warning: This method assumes that the data structure is acyclical.
@@ -1576,38 +1582,87 @@ public class JSONObject {
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the object contains an invalid number.
      */
+    //__________________________________________________________
+    
+    public static String eccezioneValueToStringMethod(Object value) {
+    	  try {
+              if (value instanceof JSONString) {
+                  Object o = ((JSONString)value).toJSONString();
+                  if (o instanceof String) {
+                      return (String)o;
+                  }
+              }
+          } catch (Exception ignore) {
+          }
+    }
+    //__________________________________________________________
+    
+    public static String valueNumberMethod(Object value) {
+    	if (value instanceof Number) {
+            return numberToString((Number) value);
+        }
+    }
+    
+    //__________________________________________________________
+    
+    public static String valueBooleanMethod(Object value) {
+    	if (value instanceof Boolean) {
+            return value.toString();
+        }
+    }
+    
+    //_________________________________________________________
+    
+    public static String valueJsonObjectValueMetod(Object value, int indent, int indentFactor) {
+    	if (value instanceof JSONObject) {
+            return ((JSONObject)value).toString(indentFactor, indent);
+        }
+    }
+    //___________________________________________________________
+    
+    public static String valueJsonArrayValueMethod(Object value, int indentFactor, int indent) {
+    	if (value instanceof JSONArray) {
+            return ((JSONArray)value).toString(indentFactor, indent);
+        }
+    }
+    
+    //___________________________________________________________
+    
+    public static String valueJsonObjectValueMap(Object value, int indentFactor, int indent) {
+    	 if (value instanceof Map) {
+             return new JSONObject((Map)value).toString(indentFactor, indent);
+         }
+    }
+    //__________________________________________________________
+    
+  //___________________________________________________________
+    
+    public static String valueJsonObjectValueCollection(Object value, int indentFactor, int indent) {
+    	if (value instanceof Collection) {
+            return new JSONArray((Collection)value).toString(indentFactor, indent);
+        }
+    }
+    //__________________________________________________________
      static String valueToString(Object value, int indentFactor, int indent)
             throws JSONException {
+    	 
         if (value == null || value.equals(null)) {
             return "null";
         }
-        try {
-            if (value instanceof JSONString) {
-                Object o = ((JSONString)value).toJSONString();
-                if (o instanceof String) {
-                    return (String)o;
-                }
-            }
-        } catch (Exception ignore) {
-        }
-        if (value instanceof Number) {
-            return numberToString((Number) value);
-        }
-        if (value instanceof Boolean) {
-            return value.toString();
-        }
-        if (value instanceof JSONObject) {
-            return ((JSONObject)value).toString(indentFactor, indent);
-        }
-        if (value instanceof JSONArray) {
-            return ((JSONArray)value).toString(indentFactor, indent);
-        }
-        if (value instanceof Map) {
-            return new JSONObject((Map)value).toString(indentFactor, indent);
-        }
-        if (value instanceof Collection) {
-            return new JSONArray((Collection)value).toString(indentFactor, indent);
-        }
+        
+        String o = eccezioneValueToStringMethod(value);
+      value = valueNumberMethod(value);
+        
+      value = valueBooleanMethod(value);
+        
+      value = valueJsonObjectValueMetod( value, indent,indentFactor);
+        
+      valueJsonArrayValueMethod(value,indentFactor,indent);
+        
+       valueJsonObjectValueMap(value, indentFactor, indent);
+       
+        valueJsonObjectValueCollection( value, indentFactor,  indent);
+        
         if (value.getClass().isArray()) {
             return new JSONArray(value).toString(indentFactor, indent);
         }
