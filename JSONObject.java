@@ -1,5 +1,5 @@
 package org.json;
-//annarita è cieca252
+//annarita è cieca22
 /*
 Copyright (c) 2002 JSON.org
 
@@ -1496,25 +1496,55 @@ public class JSONObject {
      *  with <code>}</code>&nbsp;<small>(right brace)</small>.
      * @throws JSONException If the value is or contains an invalid number.
      */
-    static String valueToString(Object value) throws JSONException {
-        if (value == null || value.equals(null)) {
+    //____________________________________________________________
+    
+    public static String (Object value) {
+    	
+    	if (value == null || value.equals(null)) {
             return "null";
         }
-        if (value instanceof JSONString) {
-            Object o;
+    }
+    //____________________________________________________________
+    
+    public static Object eccezioneValueToString(Object o) {
+    	//divido il metodo principale per sviluppare solo le eccezioni
+    	
+    	if (value instanceof JSONString) {
+            
             try {
                 o = ((JSONString)value).toJSONString();
             } catch (Exception e) {
                 throw new JSONException(e);
-            }
-            if (o instanceof String) {
-                return (String)o;
-            }
-            throw new JSONException("Bad value from toJSONString: " + o);
+            }	
+    }
+    	return o;
+    }
+    
+    //_____________________________________________________________
+    public static String stringValue (Object o) {
+    	if (o instanceof String) {
+            return (String)o;
         }
-        if (value instanceof Number) {
+        throw new JSONException("Bad value from toJSONString: " + o);
+    }    
+    
+    //____________________________________________________________
+    
+    public static Number numberValue (Object o) {
+    	if (value instanceof Number) {
             return numberToString((Number) value);
         }
+    }    
+    //___________________________________________________________
+    
+    static String valueToString(Object value) throws JSONException {
+    	nullMethod(value);
+    	Object o;
+    	o= eccezioneValueToString(o);
+    	
+        stringValue(o);
+         numberValue(o); 
+        //
         if (value instanceof Boolean || value instanceof JSONObject ||
                 value instanceof JSONArray) {
             return value.toString();
@@ -1597,38 +1627,66 @@ public class JSONObject {
       * @param object The object to wrap
       * @return The wrapped value
       */
+     //_________________________________________________________
+     
+     public static Object objectWrapMethod(Object object) {
+    	 if (object instanceof JSONObject || object instanceof JSONArray || 
+        		 NULL.equals(object)      || object instanceof JSONString || 
+        		 object instanceof Byte   || object instanceof Character ||
+                 object instanceof Short  || object instanceof Integer   ||
+                 object instanceof Long   || object instanceof Boolean   || 
+                 object instanceof Float  || object instanceof Double    ||
+                 object instanceof String) {
+             return object;
+         }
+     }
+     
+     //________________________________________________________
+     
+     public static Collection collezioneWrapMethod(Object object) {
+    	 if (object instanceof Collection) {
+             return new JSONArray((Collection)object);
+         } 
+     }
+     
+     //________________________________________________________
+     
+     public static JSONArray jsonArraywrapMethod(Object object) {
+    	 if (object.getClass().isArray()) {
+             return new JSONArray(object);
+         }
+     }
+     //________________________________________________________
+     
+     public static Object objectObjectWrapMethod(Object object) {
+    	 Package objectPackage = object.getClass().getPackage();
+         String objectPackageName = ( objectPackage != null ? objectPackage.getName() : "" );
+         if (objectPackageName.startsWith("java.") ||
+        		 objectPackageName.startsWith("javax.") ||
+        		 object.getClass().getClassLoader() == null) {
+             return object.toString();
+         }
+         return new JSONObject(object);
+     }
+     
+     //__________________________________________________________
      static Object wrap(Object object) {
          try {
              if (object == null) {
                  return NULL;
              }
-             if (object instanceof JSONObject || object instanceof JSONArray || 
-            		 NULL.equals(object)      || object instanceof JSONString || 
-            		 object instanceof Byte   || object instanceof Character ||
-                     object instanceof Short  || object instanceof Integer   ||
-                     object instanceof Long   || object instanceof Boolean   || 
-                     object instanceof Float  || object instanceof Double    ||
-                     object instanceof String) {
-                 return object;
-             }
              
-             if (object instanceof Collection) {
-                 return new JSONArray((Collection)object);
-             }
-             if (object.getClass().isArray()) {
-                 return new JSONArray(object);
-             }
+             objectWrapMethod(object);
+             
+             collezioneWrapMethod(object);
+            
+             jsonArraywrapMethod(object);
+             
              if (object instanceof Map) {
                  return new JSONObject((Map)object);
              }
-             Package objectPackage = object.getClass().getPackage();
-             String objectPackageName = ( objectPackage != null ? objectPackage.getName() : "" );
-             if (objectPackageName.startsWith("java.") ||
-            		 objectPackageName.startsWith("javax.") ||
-            		 object.getClass().getClassLoader() == null) {
-                 return object.toString();
-             }
-             return new JSONObject(object);
+             objectObjectWrapMethod(object);
+             
          } catch(Exception exception) {
              return null;
          }
