@@ -1,5 +1,5 @@
 package org.json;
-//annarita è cieca
+//annarita è cieca12
 /*
 Copyright (c) 2002 JSON.org
 
@@ -1139,6 +1139,68 @@ public class JSONObject {
      * @param string A String
      * @return  A String correctly formatted for insertion in a JSON text.
      */
+    //______________________________________________________________
+    
+    public static void defaultMethod(char c, String t, StringBuffer sb) {
+    	   if (c < ' ' || (c >= '\u0080' && c < '\u00a0') ||
+                   (c >= '\u2000' && c < '\u2100')) {
+        t = "000" + Integer.toHexString(c);
+        sb.append("\\u" + t.substring(t.length() - 4));
+    } else {
+        sb.append(c);
+    }
+    	
+    }
+    //_______________________________________________________________
+    
+    
+    
+    //________________________________________
+    public static void switchForMethod(char c, char b, StringBuffer sb, String t) {
+    	  switch (c) {
+          case '\\':
+          case '"':
+              sb.append('\\');
+              sb.append(c);
+              break;
+          case '/':
+              if (b == '<') {
+                  sb.append('\\');
+              }
+              sb.append(c);
+              break;
+          case '\b':
+              sb.append("\\b");
+              break;
+          case '\t':
+              sb.append("\\t");
+              break;
+          case '\n':
+              sb.append("\\n");
+              break;
+          case '\f':
+              sb.append("\\f");
+              break;
+          case '\r':
+              sb.append("\\r");
+              break;
+          default:
+        	  defaultMethod(c, t, sb);
+           
+          }
+    }
+    //_______________________________________
+    
+    //______________________________________________
+    public static void forMethod(String string, int len,char b, char c, StringBuffer sb, String t) {
+        for (int i = 0; i < len; i += 1) {
+            b = c;
+            c = string.charAt(i);
+            switchForMethod(c, b, sb,  t);
+          
+        }
+    }
+    //___________________________________________
     public static String quote(String string) {
         if (string == null || string.length() == 0) {
             return "\"\"";
@@ -1152,46 +1214,9 @@ public class JSONObject {
         String       t;
 
         sb.append('"');
-        for (i = 0; i < len; i += 1) {
-            b = c;
-            c = string.charAt(i);
-            switch (c) {
-            case '\\':
-            case '"':
-                sb.append('\\');
-                sb.append(c);
-                break;
-            case '/':
-                if (b == '<') {
-                    sb.append('\\');
-                }
-                sb.append(c);
-                break;
-            case '\b':
-                sb.append("\\b");
-                break;
-            case '\t':
-                sb.append("\\t");
-                break;
-            case '\n':
-                sb.append("\\n");
-                break;
-            case '\f':
-                sb.append("\\f");
-                break;
-            case '\r':
-                sb.append("\\r");
-                break;
-            default:
-                if (c < ' ' || (c >= '\u0080' && c < '\u00a0') ||
-                               (c >= '\u2000' && c < '\u2100')) {
-                    t = "000" + Integer.toHexString(c);
-                    sb.append("\\u" + t.substring(t.length() - 4));
-                } else {
-                    sb.append(c);
-                }
-            }
-        }
+        
+        forMethod(string,len, b, c, sb, t);
+    
         sb.append('"');
         return sb.toString();
     }
