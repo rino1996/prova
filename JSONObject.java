@@ -1,5 +1,5 @@
 package org.json;
-
+//annarita è cieca
 /*
 Copyright (c) 2002 JSON.org
 
@@ -182,52 +182,64 @@ public class JSONObject {
         if (x.nextClean() != '{') {
             throw x.syntaxError("A JSONObject text must begin with '{'");
         }
-        for (;;) {
-            c = x.nextClean();
-            switch (c) {
-            case 0:
-                throw x.syntaxError("A JSONObject text must end with '}'");
-            case '}':
-                return;
-            default:
-                x.back();
-                key = x.nextValue().toString();
-            }
-
-            /*
-             * The key is followed by ':'. We will also tolerate '=' or '=>'.
-             */
-
-            c = x.nextClean();
-            if (c == '=') {
-                if (x.next() != '>') {
-                    x.back();
-                }
-            } else if (c != ':') {
-                throw x.syntaxError("Expected a ':' after a key");
-            }
-            putOnce(key, x.nextValue());
-
-            /*
-             * Pairs are separated by ','. We will also tolerate ';'.
-             */
-
-            switch (x.nextClean()) {
-            case ';':
-            case ',':
-                if (x.nextClean() == '}') {
-                    return;
-                }
-                x.back();
-                break;
-            case '}':
-                return;
-            default:
-                throw x.syntaxError("Expected a ',' or '}'");
-            }
-        }
+        
+        whileMethod(c, x, key);
     }
 
+    public void switch1(char c, JSONTokener x, String key) {
+    	  switch (c) {
+          case 0:
+              throw x.syntaxError("A JSONObject text must end with '}'");
+          case '}':
+              return;
+          default:
+              x.back();
+              key = x.nextValue().toString();
+          }
+    }
+    public void switch2(JSONTokener x) {
+    	switch (x.nextClean()) {
+        case ';':
+        case ',':
+            if (x.nextClean() == '}') {
+                return;
+            }
+            x.back();
+            break;
+        case '}':
+            return;
+        default:
+            throw x.syntaxError("Expected a ',' or '}'");
+        }
+    }
+    
+    public void whileMethod(char c, JSONTokener x, String key) {
+    	  for(;;) {
+              c = x.nextClean(); //prende il carattere successivo della stringa saltando gli spazi bianchi
+            
+              switch1(c, x, key);
+
+              /*
+               * The key is followed by ':'. We will also tolerate '=' or '=>'.
+               */
+
+              c = x.nextClean();
+              if (c == '=') {
+                  if (x.next() != '>') {
+                      x.back();
+                  }
+              } else if (c != ':') {
+                  throw x.syntaxError("Expected a ':' after a key");
+              }
+              putOnce(key, x.nextValue());
+
+              /*
+               * Pairs are separated by ','. We will also tolerate ';'.
+               */
+              switch2(x);
+              
+          }
+    }
 
     /**
      * Construct a JSONObject from a Map.
@@ -898,7 +910,58 @@ public class JSONObject {
         return o != null ? o.toString() : defaultValue;
     }
 
+    
+    public void ifMethod1() {
+    	if (Modifier.isPublic(method.getModifiers())) {
+            String name = method.getName();
+            String name1 = name.startsWith("get");
+            String key = "";
+             
+          ifMethod2(name, key);//verificare il passaggio method e character
+    	}
+    }
 
+    public void ifMethod2(String name, String key) {
+    	if (name.startsWith("get")) { //controlla se inizia con get
+     	  
+    		ifMethod3(name, key);
+    	    
+            }
+            else if (name.startsWith("is")) {
+                key = name.substring(2);
+            }
+    	
+    	ifMethod4(key);
+
+        }
+    
+    
+    public void ifMethod3(String name, String key) {
+    	if (name.equals("getClass") || 
+    			name.equals("getDeclaringClass")) {
+    		key = "";
+    	} else {
+    		key = name.substring(3);
+    	}
+    }
+    
+    public void ifMethod4(String key) {
+    	 if (key.length() > 0 &&
+                 Character.isUpperCase(key.charAt(0)) &&
+                 method.getParameterTypes().length == 0) {
+             if (key.length() == 1) {
+                 key = key.toLowerCase();
+             } else if (!Character.isUpperCase(key.charAt(1))) {
+                 key = key.substring(0, 1).toLowerCase() +
+                     key.substring(1);
+             }
+
+             Object result = method.invoke(bean, (Object[])null);
+
+             map.put(key, wrap(result));
+         }
+    }
+    
     private void populateMap(Object bean) {
         Class klass = bean.getClass();
 
@@ -911,34 +974,10 @@ public class JSONObject {
         for (int i = 0; i < methods.length; i += 1) {
             try {
                 Method method = methods[i];
-                if (Modifier.isPublic(method.getModifiers())) {
-                    String name = method.getName();
-                    String key = "";
-                    if (name.startsWith("get")) {
-                    	if (name.equals("getClass") || 
-                    			name.equals("getDeclaringClass")) {
-                    		key = "";
-                    	} else {
-                    		key = name.substring(3);
-                    	}
-                    } else if (name.startsWith("is")) {
-                        key = name.substring(2);
-                    }
-                    if (key.length() > 0 &&
-                            Character.isUpperCase(key.charAt(0)) &&
-                            method.getParameterTypes().length == 0) {
-                        if (key.length() == 1) {
-                            key = key.toLowerCase();
-                        } else if (!Character.isUpperCase(key.charAt(1))) {
-                            key = key.substring(0, 1).toLowerCase() +
-                                key.substring(1);
-                        }
-
-                        Object result = method.invoke(bean, (Object[])null);
-
-                        map.put(key, wrap(result));
-                    }
-                }
+                
+                ifMethod1();
+                
+                
             } catch (Exception ignore) {
             }
         }
