@@ -1,5 +1,5 @@
 package org.json;
-//annarita è cieca12
+//annarita è cieca252
 /*
 Copyright (c) 2002 JSON.org
 
@@ -1178,12 +1178,7 @@ public class JSONObject {
           case '\n':
               sb.append("\\n");
               break;
-          case '\f':
-              sb.append("\\f");
-              break;
-          case '\r':
-              sb.append("\\r");
-              break;
+        
           default:
         	  defaultMethod(c, t, sb);
            
@@ -1247,19 +1242,70 @@ public class JSONObject {
      * @param s A String.
      * @return A simple JSON value.
      */
+    //__________________________________________________
+    
+    public static Boolean ifstringToValueMethod(String s) {
+    	 if (s.equals("")) {
+    		 Boolean x = s.equals("");
+             return x;
+         }
+         if (s.equalsIgnoreCase("true")) {
+             return Boolean.TRUE;
+         }
+         if (s.equalsIgnoreCase("false")) {
+             return Boolean.FALSE;
+         }
+         if (s.equalsIgnoreCase("null")) {
+             return (Boolean) JSONObject.NULL;
+         }
+    	
+    }
+    
+    //__________________________________________________
+    
+    public static Integer primaProva(String s, char b) {
+    	if (b == '0' && s.length() > 2 &&
+                (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
+        try {
+            return new Integer(Integer.parseInt(s.substring(2), 16));
+        } catch (Exception ignore) {
+        }
+    }
+    	
+    }
+    
+    //_________________________________________________
+    
+    public static Double secondaProva(String s) {
+    	try {
+            if (s.indexOf('.') > -1 || 
+            		s.indexOf('e') > -1 || s.indexOf('E') > -1) {
+                return Double.valueOf(s);
+            } else {
+                Long myLong = new Long(s);
+                ifSecondaProva(myLong);
+                
+            }
+        }  catch (Exception ignore) {
+        }
+    }
+    
+    //______________________________________________
+    
+    public static int ifSecondaProva(Long myLong) {
+    
+    	if (myLong.longValue() == myLong.intValue()) {
+            return new Integer(myLong.intValue());
+        } else {
+            return myLong.intValue();
+        }
+    }
+    
+    //____________________________________________
     static public Object stringToValue(String s) {
-        if (s.equals("")) {
-            return s;
-        }
-        if (s.equalsIgnoreCase("true")) {
-            return Boolean.TRUE;
-        }
-        if (s.equalsIgnoreCase("false")) {
-            return Boolean.FALSE;
-        }
-        if (s.equalsIgnoreCase("null")) {
-            return JSONObject.NULL;
-        }
+    	
+    	ifstringToValueMethod(s);
+       
 
         /*
          * If it might be a number, try converting it. 
@@ -1269,30 +1315,12 @@ public class JSONObject {
          * conventions are non-standard. A JSON parser may accept
          * non-JSON forms as long as it accepts all correct JSON forms.
          */
-
+    	
         char b = s.charAt(0);
         if ((b >= '0' && b <= '9') || b == '.' || b == '-' || b == '+') {
-            if (b == '0' && s.length() > 2 &&
-                        (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
-                try {
-                    return new Integer(Integer.parseInt(s.substring(2), 16));
-                } catch (Exception ignore) {
-                }
-            }
-            try {
-                if (s.indexOf('.') > -1 || 
-                		s.indexOf('e') > -1 || s.indexOf('E') > -1) {
-                    return Double.valueOf(s);
-                } else {
-                    Long myLong = new Long(s);
-                    if (myLong.longValue() == myLong.intValue()) {
-                        return new Integer(myLong.intValue());
-                    } else {
-                        return myLong;
-                    }
-                }
-            }  catch (Exception ignore) {
-            }
+        	primaProva( s, b);
+        	secondaProva(s);
+            
         }
         return s;
     }
